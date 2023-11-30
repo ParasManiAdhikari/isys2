@@ -7,13 +7,23 @@ public class AStarAlgorithm {
     public static List<City> cities = readCities();
     public static List<Connection> connections = readConnections();
     public static void main(String[] args) {
-        List<String> optimalRoute = aStarSearch(cities, connections, getCityByName("A"), getCityByName("B"), 410); // 410 for test1
-//        aStarAlgorithm(cities, connections);
         int index = 2;
-        System.out.println(connections.get(index).city1.name + ", " + connections.get(index).city2.name);
+//        System.out.println(connections.get(index).city1.name + ", " + connections.get(index).city2.name);
+
+        List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), 410);
+        System.out.println(path);
     }
 
-    public static List<String> aStarSearch(List<City> cities, List<Connection> connections, City start, City goal, int maxRange) {
+    private static City getCityByName(String cityName) {
+        for (int i = 0; i < cities.size(); i++) {
+            if (cities.get(i).name.equals(cityName)) {
+                return cities.get(i);
+            }
+        }
+        return null; // City not found
+    }
+
+    public static List<String> aStarSearch(City start, City goal, int maxRange) {
         PriorityQueue<AStarNode> openList = new PriorityQueue<>();
         Set<City> closedList = new HashSet<>();
 
@@ -21,7 +31,7 @@ public class AStarAlgorithm {
 
         AStarNode startNode = new AStarNode(start, 0, heuristicValue(start, goal));
         openList.add(startNode);
-
+//        printNodeList(openList);
         while (!openList.isEmpty()) {
             AStarNode currentNode = openList.poll();
             City currentCity = currentNode.city;
@@ -97,8 +107,8 @@ public class AStarAlgorithm {
             br.readLine(); // Skip the header line
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(";");
-                City city1 = new City(parts[0], getHeuristicValueByName(parts[0]), getladeStatiionByName(parts[0]));
-                City city2 = new City(parts[1], getHeuristicValueByName(parts[1]), getladeStatiionByName(parts[1]));
+                City city1 = getCityByName(parts[0]);
+                City city2 = getCityByName(parts[1]);
                 int distance = Integer.parseInt(parts[2]);
                 connections.add(new Connection(city1, city2, distance));
             }
@@ -106,32 +116,5 @@ public class AStarAlgorithm {
             throw new RuntimeException(e);
         }
         return connections;
-    }
-
-    private static City getCityByName(String cityName) {
-        for (int i = 0; i < cities.size(); i++) {
-            if (cities.get(i).name.equals(cityName)) {
-                return cities.get(i);
-            }
-        }
-        return null; // City not found
-    }
-
-    private static boolean getladeStatiionByName(String cityName) {
-        for (int i = 0; i < cities.size(); i++) {
-            if (cities.get(i).name.equals(cityName)) {
-                return cities.get(i).hasChargeStation;
-            }
-        }
-        return false; // City not found
-    }
-
-    private static int getHeuristicValueByName(String cityName) {
-        for (int i = 0; i < cities.size(); i++) {
-            if (cities.get(i).name.equals(cityName)) {
-                return cities.get(i).heuristicValue;
-            }
-        }
-        return 0; // City not found
     }
 }
