@@ -1,4 +1,4 @@
-class Connection {
+public class Connection {
     City city1;
     City city2;
     int distance;
