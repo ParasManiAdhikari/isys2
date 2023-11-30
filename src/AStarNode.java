@@ -1,10 +1,10 @@
 class AStarNode implements Comparable<AStarNode> {
-    String city;
+    City city;
     int gCost;
     int hCost;
     int fCost;
 
-    public AStarNode(String city, int gCost, int hCost) {
+    public AStarNode(City city, int gCost, int hCost) {
         this.city = city;
         this.gCost = gCost;
         this.hCost = hCost;
