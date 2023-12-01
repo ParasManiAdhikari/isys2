@@ -5,8 +5,10 @@ import java.util.*;
 public class AStarAlgorithm {
     public static List<City> cities = readCities();
     public static List<Connection> connections = readConnections();
+
+    public static int CHARGECOST;
     public static void main(String[] args) {
-        List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), 410);
+        List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), 60);
         System.out.println(path);
     }
 
@@ -25,7 +27,7 @@ public class AStarAlgorithm {
 
         Map<City, City> parentMap = new HashMap<>();
 
-        AStarNode startNode = new AStarNode(start, 0, start.heuristicValue);
+        AStarNode startNode = new AStarNode(start, 0, start.heuristicValue, maxRange);
         openList.add(startNode);
 
         while (!openList.isEmpty()) {
@@ -44,22 +46,29 @@ public class AStarAlgorithm {
             System.out.println(currentCity.name + " : Chosen from Open List | " + "GCOST : " + currentNode.gCost);
             System.out.println("CLOSED LIST: " + "{ " + printList(closedList) + " }");
             System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
+            System.out.println("Remaining Range: " + currentNode.remainingRange);
+
             System.out.println("------------Possible EXPANSIONS-------------");
 
             for (Connection connection : connections) {
                 if (connection.city1.equals(currentCity) && !closedList.contains(connection.city2)) {
-                    System.out.print("* Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | ");
                     int tentativeGCost = currentNode.gCost + connection.distance;
+                    System.out.print("* Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | " + connection.distance + " | ");
 
-                    if (tentativeGCost > maxRange && !currentCity.hasChargeStation) {
-                        System.out.print(tentativeGCost +  " > " +  maxRange);
-                        continue; // Skip this connection if charging is needed and no charging station is available
+                    if (currentNode.remainingRange < connection.distance) {
+                        if(currentCity.hasChargeStation){
+                            System.out.print("CHARGING ");
+                            currentNode.remainingRange = maxRange;
+                            tentativeGCost += CHARGECOST;
+                        } else {
+                            System.out.print("RANGE EXCEEDED \n");
+                            continue;
+                        }
                     }
 
-                    AStarNode neighbor = new AStarNode(connection.city2, tentativeGCost, connection.city2.heuristicValue);
+                    AStarNode neighbor = new AStarNode(connection.city2, tentativeGCost, connection.city2.heuristicValue, currentNode.remainingRange-connection.distance) ;
 
                     if (!openList.contains(neighbor) || tentativeGCost < neighbor.gCost) {
-                        System.out.print(tentativeGCost);
                         parentMap.put(connection.city2, currentCity);
 
                         openList.add(neighbor);
@@ -70,7 +79,7 @@ public class AStarAlgorithm {
                     System.out.println("* Neighbour "+  connection.city2.name + " already explored. *");
                 }
             }
-            printParentMap(parentMap);
+//            printParentMap(parentMap);
         }
 
         return new ArrayList<>();                                                                                       // EMPTY
