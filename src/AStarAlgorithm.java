@@ -25,7 +25,7 @@ public class AStarAlgorithm {
 
         Map<City, City> parentMap = new HashMap<>();
 
-        AStarNode startNode = new AStarNode(start, 0, heuristicValue(start, goal));
+        AStarNode startNode = new AStarNode(start, 0, start.heuristicValue);
         openList.add(startNode);
 
         while (!openList.isEmpty()) {
@@ -35,6 +35,7 @@ public class AStarAlgorithm {
             City currentCity = currentNode.city;
 
             if (currentCity.equals(goal)) {
+                System.out.println("TOTAL COST " + currentNode.gCost);
                 System.out.println("B REACHED");
                 return reconstructPath(parentMap, start, goal);
             }
@@ -55,7 +56,7 @@ public class AStarAlgorithm {
                         continue; // Skip this connection if charging is needed and no charging station is available
                     }
 
-                    AStarNode neighbor = new AStarNode(connection.city2, tentativeGCost, heuristicValue(connection.city2, goal));
+                    AStarNode neighbor = new AStarNode(connection.city2, tentativeGCost, connection.city2.heuristicValue);
 
                     if (!openList.contains(neighbor) || tentativeGCost < neighbor.gCost) {
                         System.out.print(tentativeGCost);
