@@ -54,13 +54,18 @@ public class AStarAlgorithm {
 
             for (Connection connection : connections) {
 //                System.out.println("START" + currentNode.remainingRange);
-                if (connection.city1.equals(currentCity) && !closedList.contains(connection.city2)) {                   // CHECKING NEXT CITY
-                    System.out.print("*Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | " + connection.distance + " | ");
+                if ((connection.city1.equals(currentCity) || connection.city2.equals(currentCity)))
+                {
+                    City neighbour = (connection.city1 == currentCity) ? connection.city2 : connection.city1;
+                    if(closedList.contains(connection.city2)){
+                        System.out.println("* Neighbour "+  neighbour.name + " already explored. *");
+                        continue;
+                    }
                     validConnectionExists = true;
                     int tentativeGCost = currentNode.gCost + connection.distance;
+                    System.out.print("*Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | " + connection.distance + " | ");
 
-
-                    if (currentNode.remainingRange < connection.distance ) {                                            // When range is exceeded
+                    if (currentNode.remainingRange < connection.distance ) {
                         if(currentCity.hasChargeStation){
                             System.out.print("CHARGING ");
                             currentNode.remainingRange = maxRange;
@@ -86,8 +91,6 @@ public class AStarAlgorithm {
                         System.out.print(neighbor.city.name + " -> OpenList *");
                     }
                     System.out.println();
-                } else if(connection.city1.equals(currentCity) && closedList.contains(connection.city2)){
-                    System.out.println("* Neighbour "+  connection.city2.name + " already explored. *");
                 }
             }
             if (!validConnectionExists) {
