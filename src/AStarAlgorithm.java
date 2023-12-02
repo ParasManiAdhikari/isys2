@@ -6,10 +6,11 @@ public class AStarAlgorithm {
     public static List<City> cities = readCities();
     public static List<Connection> connections = readConnections();
 
-    public static int CHARGECOST;
+    public static int CHARGECOST = 10;
     public static void main(String[] args) {
-        List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), 60);
+        List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), 40);
         System.out.println(path);
+//        System.out.println(getDistance(getCityByName("A"), getCityByName("C")));
     }
 
     private static City getCityByName(String cityName) {
@@ -43,19 +44,23 @@ public class AStarAlgorithm {
             }
             closedList.add(currentCity);
 
-            System.out.println(currentCity.name + " : Chosen from Open List | " + "GCOST : " + currentNode.gCost);
+            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange);
             System.out.println("CLOSED LIST: " + "{ " + printList(closedList) + " }");
             System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
-            System.out.println("Remaining Range: " + currentNode.remainingRange);
 
             System.out.println("------------Possible EXPANSIONS-------------");
 
-            for (Connection connection : connections) {
-                if (connection.city1.equals(currentCity) && !closedList.contains(connection.city2)) {
-                    int tentativeGCost = currentNode.gCost + connection.distance;
-                    System.out.print("* Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | " + connection.distance + " | ");
+            boolean validConnectionExists = false;
 
-                    if (currentNode.remainingRange < connection.distance) {
+            for (Connection connection : connections) {
+//                System.out.println("START" + currentNode.remainingRange);
+                if (connection.city1.equals(currentCity) && !closedList.contains(connection.city2)) {                   // CHECKING NEXT CITY
+                    System.out.print("*Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | " + connection.distance + " | ");
+                    validConnectionExists = true;
+                    int tentativeGCost = currentNode.gCost + connection.distance;
+
+
+                    if (currentNode.remainingRange < connection.distance ) {                                            // When range is exceeded
                         if(currentCity.hasChargeStation){
                             System.out.print("CHARGING ");
                             currentNode.remainingRange = maxRange;
@@ -66,23 +71,56 @@ public class AStarAlgorithm {
                         }
                     }
 
+                    if(currentCity.hasChargeStation){
+                        System.out.print("CHARGING IMMEDIATE ");
+                        currentNode.remainingRange = maxRange;
+                        tentativeGCost += CHARGECOST;
+                    }
+
                     AStarNode neighbor = new AStarNode(connection.city2, tentativeGCost, connection.city2.heuristicValue, currentNode.remainingRange-connection.distance) ;
 
                     if (!openList.contains(neighbor) || tentativeGCost < neighbor.gCost) {
                         parentMap.put(connection.city2, currentCity);
 
                         openList.add(neighbor);
-                        System.out.print(" | " + neighbor.city.name + " -> OpenList *");
+                        System.out.print(neighbor.city.name + " -> OpenList *");
                     }
                     System.out.println();
                 } else if(connection.city1.equals(currentCity) && closedList.contains(connection.city2)){
                     System.out.println("* Neighbour "+  connection.city2.name + " already explored. *");
                 }
             }
+            if (!validConnectionExists) {
+                City parentCity = parentMap.get(currentCity);
+                if (parentCity != null) {
+                    int distance = getDistance(parentCity, currentCity);
+                    int costFromStart = currentNode.gCost + distance;
+                    // CHARGE FIRST
+                    if(currentCity.hasChargeStation){
+                        //CHARGE
+                        System.out.println("CHARGING");
+                        currentNode.remainingRange = maxRange;
+                        costFromStart += CHARGECOST;
+                    }
+                    closedList.remove(parentCity);
+                    openList.add(new AStarNode(parentCity, costFromStart, 0, currentNode.remainingRange - distance));
+                    System.out.println("No valid connection found. Going back to parent city: " + parentCity.name);
+                }
+            }
 //            printParentMap(parentMap);
         }
 
         return new ArrayList<>();                                                                                       // EMPTY
+    }
+
+    private static int getDistance(City parentCity, City currentCity) {
+        for (Connection connection : connections) {
+            if ((connection.city1.equals(parentCity) && connection.city2.equals(currentCity)) ||
+                    (connection.city1.equals(currentCity) && connection.city2.equals(parentCity))) {
+                return connection.distance;
+            }
+        }
+        return -1; // Indicating that no connection is found between the two cities
     }
 
     private static String printList(List<City> closedList) {
@@ -127,7 +165,7 @@ public class AStarAlgorithm {
 
     private static List<City> readCities() {
         List<City> cities = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\paras\\IdeaProjects\\isys2\\src\\resources\\testcases_Teilaufgabe_2\\t1_cities.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\paras\\IdeaProjects\\isys2\\src\\resources\\testcases_Teilaufgabe_2\\t4_cities.txt"))) {
             String line;
             br.readLine(); // Skip the header line
             while ((line = br.readLine()) != null) {
@@ -145,7 +183,7 @@ public class AStarAlgorithm {
 
     private static List<Connection> readConnections() {
         List<Connection> connections = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\paras\\IdeaProjects\\isys2\\src\\resources\\testcases_Teilaufgabe_2\\t1_connections.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\paras\\IdeaProjects\\isys2\\src\\resources\\testcases_Teilaufgabe_2\\t4_connections.txt"))) {
             String line;
             br.readLine(); // Skip the header line
             while ((line = br.readLine()) != null) {
