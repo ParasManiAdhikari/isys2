@@ -44,7 +44,7 @@ public class AStarAlgorithm {
             }
             closedList.add(currentCity);
 
-            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange);
+            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost);
             System.out.println("CLOSED LIST: " + "{ " + printList(closedList) + " }");
             System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
 
@@ -95,24 +95,20 @@ public class AStarAlgorithm {
             }
             if (!validConnectionExists) {
                 City parentCity = parentMap.get(currentCity);
-                if (parentCity != null) {
-                    int distance = getDistance(parentCity, currentCity);
-                    int costFromStart = currentNode.gCost + distance;
-                    // CHARGE FIRST
-                    if(currentCity.hasChargeStation){
+                if (parentCity != null && currentCity.hasChargeStation) {
+                        int distance = getDistance(parentCity, currentCity);
+                        int costFromStart = currentNode.gCost + distance + CHARGECOST;
+                        int newRemainingRange = maxRange - distance;
                         //CHARGE
+                        closedList.remove(parentCity);
                         System.out.println("CHARGING");
-                        currentNode.remainingRange = maxRange;
-                        costFromStart += CHARGECOST;
+                        openList = new PriorityQueue<>();  // RESET OPENLIST
+                        openList.add(new AStarNode(parentCity, costFromStart, parentCity.heuristicValue, newRemainingRange));
+                        System.out.println("Charging and Going back to parent city: " + parentCity.name);
                     }
-                    closedList.remove(parentCity);
-                    openList.add(new AStarNode(parentCity, costFromStart, 0, currentNode.remainingRange - distance));
-                    System.out.println("No valid connection found. Going back to parent city: " + parentCity.name);
                 }
             }
 //            printParentMap(parentMap);
-        }
-
         return new ArrayList<>();                                                                                       // EMPTY
     }
 
