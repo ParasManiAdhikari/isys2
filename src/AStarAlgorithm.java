@@ -223,7 +223,7 @@ public class AStarAlgorithm {
         List<City> closedList = new ArrayList<>();
         Map<City, City> parentMap = new HashMap<>();
 
-        AStarNode startNode = new AStarNode(start, STARTCOST, start.heuristicValue, maxRange);
+        AStarNode startNode = new AStarNode(start, STARTCOST, start.heuristicValue, maxRange, null);
         openList.add(startNode);
 
         while (!openList.isEmpty()) {
@@ -232,8 +232,8 @@ public class AStarAlgorithm {
 
             if (currentCity.equals(goal)) {
                 System.out.println("TOTAL COST " + currentNode.gCost);
-                return new ArrayList<>();
-//                return reconstructPath(parentMap, start, goal);
+//                return new ArrayList<>();
+                return reconstructPath(parentMap, start, goal);
             }
             closedList.add(currentCity);
             boolean chargingNeeded = currentNode.remainingRange <= currentNode.gCost;
@@ -258,7 +258,7 @@ public class AStarAlgorithm {
                         }
                     }
 
-                    AStarNode neighbor = new AStarNode(neighbour, costFromStart, neighbour.heuristicValue, currentNode.remainingRange - connection.distance);
+                    AStarNode neighbor = new AStarNode(neighbour, costFromStart, neighbour.heuristicValue, currentNode.remainingRange - connection.distance, currentNode);
                     AStarNode openListContains = openListContains(neighbour, openList);
                     if (openListContains == null) {
                         parentMap.put(neighbour, currentCity);
@@ -275,8 +275,9 @@ public class AStarAlgorithm {
                     double newRemainingRange = maxRange - distance;
                     closedList = new ArrayList<>();
                     closedList.add(currentCity);
+                    closedList.add(currentNode.previous.previous.city);                                                 // Close off where parent came from
                     openList = new PriorityQueue<>();
-                    openList.add(new AStarNode(parentCity, costFromStart, parentCity.heuristicValue, newRemainingRange));
+                    openList.add(new AStarNode(parentCity, costFromStart, parentCity.heuristicValue, newRemainingRange, currentNode));
                 }
             }
         }

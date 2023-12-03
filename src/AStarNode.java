@@ -4,13 +4,14 @@ class AStarNode implements Comparable<AStarNode> {
     double hCost;
     double totalCost;
     double remainingRange;
-
-    public AStarNode(City city, double gCost, double hCost, double remainingRange) {
+    AStarNode previous;
+    public AStarNode(City city, double gCost, double hCost, double remainingRange, AStarNode previous) {
         this.city = city;
         this.gCost = gCost;
         this.hCost = hCost;
         this.remainingRange = remainingRange;
         this.totalCost = gCost + hCost;
+        this.previous = previous;
     }
 
     @Override
