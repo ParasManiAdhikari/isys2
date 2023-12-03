@@ -56,9 +56,9 @@ public class AStarAlgorithm {
 
             for (Connection connection : connections) {
 //                System.out.println("START" + currentNode.remainingRange);
-                if ((connection.city1.equals(currentCity) || connection.city2.equals(currentCity)))
+                if (connection.city1.equals(currentCity))
                 {
-                    City neighbour = (connection.city1 == currentCity) ? connection.city2 : connection.city1;
+                    City neighbour = connection.city2;
                     if(closedList.contains(connection.city2)){
                         System.out.println("* Neighbour "+  neighbour.name + " already explored. *");
                         continue;
