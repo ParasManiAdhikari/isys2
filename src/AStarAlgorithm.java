@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+
 public class AStarAlgorithm {
     public static List<City> cities = new ArrayList<>();
     public static List<BigCity> bigCities = new ArrayList<>();
@@ -11,24 +12,28 @@ public class AStarAlgorithm {
     public static double STARTCOST = 0;
     public static double CHARGECOST = 10;
     public static double BigTestRange = 200;
+
     public static void main(String[] args) {
-//        int[] ranges = {410, 500, 30, 40, 30, 410, 410};
-//        for(double i = 1; i <= 7; i++){
-//            System.out.println("TESTCASE " +  i);
-//            cities = readCities("src/resources/testcases_Teilaufgabe_2/t" + i + "_cities.txt");
-//            connections = readConnections("src/resources/testcases_Teilaufgabe_2/t" + i + "_connections.txt");
-//            List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), ranges[i-1]);
-//            System.out.println(path);
-//            System.out.println("-----------");
-//        }
-        for(TestCase testCase : testCases){
-            bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
-            cities = convertBigCities(bigCities, testCase.goal);
-            connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
-            List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), 200);
+        // AUFGABE 2
+        int[] ranges = {410, 500, 30, 40, 30, 410, 410};
+        for(int i = 1; i <= 7; i++){
+            System.out.println("TESTCASE " +  i);
+            cities = readCities("src/resources/testcases_Teilaufgabe_2/t" + i + "_cities.txt");
+            connections = readConnections("src/resources/testcases_Teilaufgabe_2/t" + i + "_connections.txt");
+            List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), ranges[i-1]);
             System.out.println(path);
-            System.out.println("-------");
+            System.out.println("-----------");
         }
+        // AUFGABE 3
+//        for(TestCase testCase : testCases){
+//            bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
+//            cities = convertBigCities(bigCities, testCase.goal);
+//            connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
+//            List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), 200);
+//            System.out.println(path);
+//            System.out.println("-------");
+//        }
+        // SINGLE TEST CASE - BIG CITY
 //        TestCase testCase = new TestCase("Bohmte", "Kappeln");
 //        bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
 //        cities = convertBigCities(bigCities, testCase.goal);
@@ -40,14 +45,12 @@ public class AStarAlgorithm {
     private static List<City> convertBigCities(List<BigCity> bigCities, String goal) {
         List<City> cities = new ArrayList<>();
         BigCity goalCity = null;
-        // Find Goal City
-        for(BigCity bigCity: bigCities){
-            if(bigCity.name.equals(goal)){
+        for (BigCity bigCity : bigCities) {
+            if (bigCity.name.equals(goal)) {
                 goalCity = bigCity;
             }
         }
-        // Convert Bigcity to City
-        for(BigCity bigCity: bigCities){
+        for (BigCity bigCity : bigCities) {
             double heuristic = haversine_distance(bigCity.latitude, bigCity.longitude, goalCity.latitude, goalCity.longitude);
             cities.add(new City(bigCity.name, heuristic, bigCity.hasChargeStation));
         }
@@ -69,11 +72,12 @@ public class AStarAlgorithm {
         }
         return tests;
     }
+
     private static List<City> readCities(String path) {
         List<City> cities = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
-            br.readLine(); // Skip the header line
+            br.readLine();
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(";");
                 String name = parts[0];
@@ -86,11 +90,12 @@ public class AStarAlgorithm {
         }
         return cities;
     }
+
     private static List<BigCity> readBigCities(String path) {
         List<BigCity> cities = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
-            br.readLine(); // Skip the header line
+            br.readLine();
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(";");
                 String name = parts[0];
@@ -109,7 +114,7 @@ public class AStarAlgorithm {
         List<Connection> connections = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
-            br.readLine(); // Skip the header line
+            br.readLine();
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(";");
                 City city1 = getCityByName(parts[0]);
@@ -129,100 +134,77 @@ public class AStarAlgorithm {
                 return city;
             }
         }
-        return null; // City not found
+        return null;
     }
 
     public static List<String> aStarSearch(City start, City goal, double maxRange) {
         PriorityQueue<AStarNode> openList = new PriorityQueue<>();
         List<City> closedList = new ArrayList<>();
-
         Map<City, City> parentMap = new HashMap<>();
 
         AStarNode startNode = new AStarNode(start, STARTCOST, start.heuristicValue, maxRange);
         openList.add(startNode);
 
         while (!openList.isEmpty()) {
-//            System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
-//            System.out.println("-------------------------\n");
             AStarNode currentNode = openList.poll();
             City currentCity = currentNode.city;
 
             if (currentCity.equals(goal)) {
                 System.out.println("TOTAL COST " + currentNode.gCost);
-//                return reconstructPath(parentMap, start, goal);
                 return new ArrayList<>();
             }
             closedList.add(currentCity);
             boolean chargingNeeded = currentNode.remainingRange <= currentNode.gCost;
 
-//            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost + (chargingNeeded ? " | CHARGING NEEDED" : ""));
-//            System.out.println("CLOSED LIST: " + "{ " + printList(closedList) + " }");
-//            System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
-//
-//            System.out.println("------------Possible EXPANSIONS-------------");
-
             boolean hasForwardConnection = false;
 
             for (Connection connection : connections) {
-                if ((connection.city1.equals(currentCity) || connection.city2.equals(currentCity)))
-                {
+                if ((connection.city1.equals(currentCity) || connection.city2.equals(currentCity))) {
                     City neighbour = (connection.city1 == currentCity) ? connection.city2 : connection.city1;
-                    if(closedList.contains(neighbour)){
-//                        System.out.println("* Neighbour "+  neighbour.name + " already explored. *");
+                    if (closedList.contains(neighbour)) {
                         continue;
                     }
                     hasForwardConnection = true;
                     double costFromStart = currentNode.gCost + connection.distance;
-//                    System.out.print("*Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | " + connection.distance + " | ");
 
-                    // Check if it needs charging
                     if (currentNode.remainingRange < connection.distance && chargingNeeded) {
-                        if(currentCity.hasChargeStation){
-//                            System.out.print("CHARGING ");
+                        if (currentCity.hasChargeStation) {
                             currentNode.remainingRange = maxRange;
                             costFromStart += CHARGECOST;
                         } else {
-//                            System.out.print("RANGE EXCEEDED \n");
                             continue;
                         }
                     }
 
-                    AStarNode neighbor = new AStarNode(neighbour, costFromStart, neighbour.heuristicValue, currentNode.remainingRange-connection.distance) ;
+                    AStarNode neighbor = new AStarNode(neighbour, costFromStart, neighbour.heuristicValue, currentNode.remainingRange - connection.distance);
                     AStarNode openListContains = openListContains(neighbour, openList);
                     if (openListContains == null) {
                         parentMap.put(neighbour, currentCity);
-
                         openList.add(neighbor);
-//                        System.out.print(neighbor.city.name + " -> OpenList *");
                     }
-//                    System.out.println();
                 }
             }
-            // CHECK RETOUR
+
             if (!hasForwardConnection) {
                 City parentCity = parentMap.get(currentCity);
                 double distance = getDistance(parentCity, currentCity);
                 if (parentCity != null && currentCity.hasChargeStation && chargingNeeded) {
-                        double costFromStart = currentNode.gCost + distance + CHARGECOST;
-                        double newRemainingRange = maxRange - distance;
-                        //CHARGE
-                        closedList = new ArrayList<>();
-                        closedList.add(currentCity);
-//                        System.out.println("CHARGING");
-                        openList = new PriorityQueue<>();  // RESET OPENLIST
-                        openList.add(new AStarNode(parentCity, costFromStart, parentCity.heuristicValue, newRemainingRange));
-//                        System.out.println("Charging and Going back to parent city: " + parentCity.name);
+                    double costFromStart = currentNode.gCost + distance + CHARGECOST;
+                    double newRemainingRange = maxRange - distance;
+                    closedList = new ArrayList<>();
+                    closedList.add(currentCity);
+                    openList = new PriorityQueue<>();
+                    openList.add(new AStarNode(parentCity, costFromStart, parentCity.heuristicValue, newRemainingRange));
                 }
             }
         }
-//            printParentMap(parentMap);
         System.out.println("Es existiert keine Lösung");
         return new ArrayList<>();
     }
 
     private static AStarNode openListContains(City neighbor, PriorityQueue<AStarNode> openList) {
-        for(AStarNode node: openList){
-            if(node.city == neighbor){
+        for (AStarNode node : openList) {
+            if (node.city == neighbor) {
                 return node;
             }
         }
@@ -236,38 +218,17 @@ public class AStarAlgorithm {
                 return connection.distance;
             }
         }
-        return -1; // Indicating that no connection is found between the two cities
+        return -1;
     }
 
     private static String printList(List<City> closedList) {
         String list = "";
-        for(City city: closedList){
+        for (City city : closedList) {
             list += " + " + city.name;
         }
         return list;
     }
 
-    private static String printList2(PriorityQueue<AStarNode> closedList) {
-        String list = "";
-        for(AStarNode node: closedList){
-            list += " + " + node.city.name;
-        }
-        return list;
-    }
-    public static void printParentMap(Map<City, City> parentMap) {
-        System.out.println("Parent Map:");
-        for (Map.Entry<City, City> entry : parentMap.entrySet()) {
-            City childCity = entry.getKey();
-            City parentCity = entry.getValue();
-            System.out.println("Child: " + childCity.name + ", Parent: " + parentCity.name);
-        }
-    }
-
-    private static double heuristicValue(City currentCity, City goalCity) {
-        return Math.abs(currentCity.heuristicValue - goalCity.heuristicValue);
-    }
-
-    // Reconstruct the path from start to goal using the parent map
     private static List<String> reconstructPath(Map<City, City> parentMap, City start, City goal) {
         List<String> path = new ArrayList<>();
         City current = goal;
