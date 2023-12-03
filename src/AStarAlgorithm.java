@@ -3,12 +3,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 public class AStarAlgorithm {
-    public static List<City> cities = readCities();
-    public static List<Connection> connections = readConnections();
+    public static List<City> cities = readCities("src/resources/testcases_Teilaufgabe_2/t7_cities.txt");
+    public static List<Connection> connections = readConnections("src/resources/testcases_Teilaufgabe_2/t7_connections.txt");
 
+    public static int STARTCOST = 0;
     public static int CHARGECOST = 10;
     public static void main(String[] args) {
-        List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), 30);
+        List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), 410);
         System.out.println(path);
 //        System.out.println(getDistance(getCityByName("A"), getCityByName("C")));
     }
@@ -28,13 +29,13 @@ public class AStarAlgorithm {
 
         Map<City, City> parentMap = new HashMap<>();
 
-        AStarNode startNode = new AStarNode(start, 0, start.heuristicValue, maxRange);
+        AStarNode startNode = new AStarNode(start, STARTCOST, start.heuristicValue, maxRange);
         openList.add(startNode);
 
         while (!openList.isEmpty()) {
             System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
             System.out.println("-------------------------\n");
-            AStarNode currentNode = openList.poll();                                                                    // Choose the lowest cost node for expansion
+            AStarNode currentNode = openList.poll();
             City currentCity = currentNode.city;
 
             if (currentCity.equals(goal)) {
@@ -43,8 +44,9 @@ public class AStarAlgorithm {
                 return reconstructPath(parentMap, start, goal);
             }
             closedList.add(currentCity);
+            boolean chargingNeeded = currentNode.remainingRange <= currentCity.heuristicValue;
 
-            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost);
+            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost + (chargingNeeded ? " | CHARGING NEEDED" : ""));
             System.out.println("CLOSED LIST: " + "{ " + printList(closedList) + " }");
             System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
 
@@ -66,7 +68,7 @@ public class AStarAlgorithm {
                     System.out.print("*Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | " + connection.distance + " | ");
 
                     // Check if it needs charging
-                    if (currentNode.remainingRange < connection.distance && currentNode.remainingRange < currentCity.heuristicValue) {
+                    if (currentNode.remainingRange < connection.distance && chargingNeeded) {
                         if(currentCity.hasChargeStation){
                             System.out.print("CHARGING ");
                             currentNode.remainingRange = maxRange;
@@ -75,12 +77,6 @@ public class AStarAlgorithm {
                             System.out.print("RANGE EXCEEDED \n");
                             continue;
                         }
-                    }
-
-                    if(currentCity.hasChargeStation){
-                        System.out.print("CHARGING IMMEDIATE ");
-                        currentNode.remainingRange = maxRange;
-                        tentativeGCost += CHARGECOST;
                     }
 
                     AStarNode neighbor = new AStarNode(connection.city2, tentativeGCost, connection.city2.heuristicValue, currentNode.remainingRange-connection.distance) ;
@@ -97,7 +93,6 @@ public class AStarAlgorithm {
             if (!hasForwardConnection) {
                 City parentCity = parentMap.get(currentCity);
                 int distance = getDistance(parentCity, currentCity);
-                boolean chargingNeeded = currentNode.remainingRange < currentCity.heuristicValue;
                 if (parentCity != null && currentCity.hasChargeStation && chargingNeeded) {
                         int costFromStart = currentNode.gCost + distance + CHARGECOST;
                         int newRemainingRange = maxRange - distance;
@@ -112,6 +107,7 @@ public class AStarAlgorithm {
             }
         }
 //            printParentMap(parentMap);
+        System.out.println("Es existiert keine Lösung");
         return new ArrayList<>();
     }
 
@@ -165,9 +161,9 @@ public class AStarAlgorithm {
         return path;
     }
 
-    private static List<City> readCities() {
+    private static List<City> readCities(String path) {
         List<City> cities = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\paras\\IdeaProjects\\isys2\\src\\resources\\testcases_Teilaufgabe_2\\t3_cities.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
             br.readLine(); // Skip the header line
             while ((line = br.readLine()) != null) {
@@ -183,9 +179,9 @@ public class AStarAlgorithm {
         return cities;
     }
 
-    private static List<Connection> readConnections() {
+    private static List<Connection> readConnections(String path) {
         List<Connection> connections = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\paras\\IdeaProjects\\isys2\\src\\resources\\testcases_Teilaufgabe_2\\t3_connections.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
             br.readLine(); // Skip the header line
             while ((line = br.readLine()) != null) {
