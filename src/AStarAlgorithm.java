@@ -3,15 +3,20 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 public class AStarAlgorithm {
-    public static List<City> cities = readCities("src/resources/testcases_Teilaufgabe_2/t7_cities.txt");
-    public static List<Connection> connections = readConnections("src/resources/testcases_Teilaufgabe_2/t7_connections.txt");
-
+    public static List<City> cities = new ArrayList<>();
+    public static List<Connection> connections = new ArrayList<>();
     public static int STARTCOST = 0;
     public static int CHARGECOST = 10;
     public static void main(String[] args) {
-        List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), 410);
-        System.out.println(path);
-//        System.out.println(getDistance(getCityByName("A"), getCityByName("C")));
+        int[] ranges = {410, 500, 30, 40, 30, 410, 410};
+        for(int i = 1; i <= 7; i++){
+            System.out.println("TESTCASE " +  i);
+            cities = readCities("src/resources/testcases_Teilaufgabe_2/t" + i + "_cities.txt");
+            connections = readConnections("src/resources/testcases_Teilaufgabe_2/t" + i + "_connections.txt");
+            List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), ranges[i-1]);
+            System.out.println(path);
+            System.out.println("-----------");
+        }
     }
 
     private static City getCityByName(String cityName) {
@@ -39,7 +44,6 @@ public class AStarAlgorithm {
             City currentCity = currentNode.city;
 
             if (currentCity.equals(goal)) {
-                System.out.println("* COMPLETED *");
                 System.out.println("TOTAL COST " + currentNode.gCost);
                 return reconstructPath(parentMap, start, goal);
             }
