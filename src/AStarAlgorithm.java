@@ -44,6 +44,10 @@ public class AStarAlgorithm {
      */
     public static double BigTestRange = 200;
 
+    public static List<Integer> expandedNodes = new ArrayList<>();
+    public static List<Integer> suchBaumNodes = new ArrayList<>();
+    public static List<Integer> totalKosten = new ArrayList<>();
+
     /**
      * The main method of the program. It demonstrates the A* algorithm on various test cases.
      *
@@ -51,31 +55,42 @@ public class AStarAlgorithm {
      */
     public static void main(String[] args) {
         // AUFGABE 2
-        int[] ranges = {410, 500, 30, 40, 30, 410, 410};
-        for(int i = 1; i <= 7; i++){
-            System.out.println("TESTCASE " +  i);
-            cities = readCities("src/resources/testcases_Teilaufgabe_2/t" + i + "_cities.txt");
-            connections = readConnections("src/resources/testcases_Teilaufgabe_2/t" + i + "_connections.txt");
-            List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), ranges[i-1]);
-            System.out.println(path);
-            System.out.println("-----------");
-        }
-        // AUFGABE 3
-//        for(TestCase testCase : testCases){
-//            bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
-//            cities = convertBigCities(bigCities, testCase.goal);
-//            connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
-//            List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), BigTestRange);
+//        int[] ranges = {410, 500, 30, 40, 30, 410, 410};
+//        for(int i = 1; i <= 7; i++){
+//            System.out.println("TESTCASE " +  i);
+//            cities = readCities("src/resources/testcases_Teilaufgabe_2/t" + i + "_cities.txt");
+//            connections = readConnections("src/resources/testcases_Teilaufgabe_2/t" + i + "_connections.txt");
+//            List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), ranges[i-1]);
 //            System.out.println(path);
-//            System.out.println("-------");
+//            System.out.println("-----------");
 //        }
-        // SINGLE TEST CASE - BIG CITY
-//        TestCase testCase = new TestCase("Bohmte", "Kappeln");
-//        bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
-//        cities = convertBigCities(bigCities, testCase.goal);
-//        connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
-//        List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), BigTestRange);
-//        System.out.println("-------");
+        // AUFGABE 3
+        for(TestCase testCase : testCases){
+            bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
+            cities = convertBigCities(bigCities, testCase.goal);
+            connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
+            List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), BigTestRange);
+//            System.out.println("-------");
+        }
+
+        double averageCost = totalKosten.stream()
+                .mapToDouble(Integer::doubleValue)
+                .average()
+                .orElse(0.0);
+
+        double averageGrenzbereich = expandedNodes.stream()
+                .mapToDouble(Integer::doubleValue)
+                .average()
+                .orElse(0.0);
+
+        double averageSuchbaumNodes = suchBaumNodes.stream()
+                .mapToDouble(Integer::doubleValue)
+                .average()
+                .orElse(0.0);
+
+        System.out.println("Average Optimal Costs for 100 TestCases: " + averageCost );
+        System.out.println("Average Search Tree Nodes for 100 TestCases: " + averageSuchbaumNodes );
+        System.out.println("Average Expanded Nodes for 100 TestCases: " + averageGrenzbereich );
     }
 
     /**
@@ -219,6 +234,7 @@ public class AStarAlgorithm {
      * @return A list of city names representing the shortest path, or an empty list if no path exists.
      */
     public static List<String> aStarSearch(City start, City goal, double maxRange) {
+        int grenzbereich = 0;
         PriorityQueue<AStarNode> openList = new PriorityQueue<>();
         List<City> closedList = new ArrayList<>();
         Map<City, City> parentMap = new HashMap<>();
@@ -229,9 +245,12 @@ public class AStarAlgorithm {
         while (!openList.isEmpty()) {
             AStarNode currentNode = openList.poll();
             City currentCity = currentNode.city;
-
+            grenzbereich++;
             if (currentCity.equals(goal)) {
-                System.out.println("TOTAL COST " + currentNode.gCost);
+                expandedNodes.add(grenzbereich);
+                totalKosten.add((int) currentNode.gCost);
+//                System.out.println("Grenzbereich " +  grenzbereich);
+//                System.out.println("TOTAL COST " + currentNode.gCost);
 //                return new ArrayList<>();
                 return reconstructPath(parentMap, start, goal);
             }
@@ -281,7 +300,6 @@ public class AStarAlgorithm {
                 }
             }
         }
-        System.out.println("Es existiert keine Lösung");
         return new ArrayList<>();
     }
 
@@ -341,13 +359,17 @@ public class AStarAlgorithm {
      * @return A list of city names representing the reconstructed path.
      */
     private static List<String> reconstructPath(Map<City, City> parentMap, City start, City goal) {
+        int maxIterations = 50;
+        int iterations = 0;
         List<String> path = new ArrayList<>();
         City current = goal;
-        while (current != null) {
+        while (current != null && iterations <= maxIterations) {
             path.add(current.name);
             current = parentMap.get(current);
+            iterations++;
         }
         Collections.reverse(path);
+        suchBaumNodes.add(path.size());
         return path;
     }
 
