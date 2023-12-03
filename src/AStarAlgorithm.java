@@ -44,7 +44,7 @@ public class AStarAlgorithm {
                 return reconstructPath(parentMap, start, goal);
             }
             closedList.add(currentCity);
-            boolean chargingNeeded = currentNode.remainingRange <= currentCity.heuristicValue;
+            boolean chargingNeeded = currentNode.remainingRange <= currentNode.gCost;
 
             System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost + (chargingNeeded ? " | CHARGING NEEDED" : ""));
             System.out.println("CLOSED LIST: " + "{ " + printList(closedList) + " }");
