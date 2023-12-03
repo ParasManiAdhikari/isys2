@@ -232,8 +232,8 @@ public class AStarAlgorithm {
 
             if (currentCity.equals(goal)) {
                 System.out.println("TOTAL COST " + currentNode.gCost);
-//                return new ArrayList<>();
-                return reconstructPath(parentMap, start, goal);
+                return new ArrayList<>();
+//                return reconstructPath(parentMap, start, goal);
             }
             closedList.add(currentCity);
             boolean chargingNeeded = currentNode.remainingRange <= currentNode.gCost;
