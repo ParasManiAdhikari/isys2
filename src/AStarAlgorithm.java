@@ -20,8 +20,7 @@ public class AStarAlgorithm {
             System.out.println("TESTCASE " +  i);
             cities = readCities("src/resources/testcases_Teilaufgabe_2/t" + i + "_cities.txt");
             connections = readConnections("src/resources/testcases_Teilaufgabe_2/t" + i + "_connections.txt");
-            List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), ranges[i-1]);
-            System.out.println(path);
+            aStarSearch(getCityByName("A"), getCityByName("B"), ranges[i-1]);
             System.out.println("-----------");
         }
         // AUFGABE 3
@@ -29,7 +28,7 @@ public class AStarAlgorithm {
 //            bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
 //            cities = convertBigCities(bigCities, testCase.goal);
 //            connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
-//            List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), 200);
+//            List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), BigTestRange);
 //            System.out.println(path);
 //            System.out.println("-------");
 //        }
@@ -38,10 +37,11 @@ public class AStarAlgorithm {
 //        bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
 //        cities = convertBigCities(bigCities, testCase.goal);
 //        connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
-//        List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), 200);
+//        List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), BigTestRange);
 //        System.out.println("-------");
     }
 
+    // CONVERT FROM BIGCITY CLASS TO NORMAL CITY CLASS BY HEURISTIC CALCULATION
     private static List<City> convertBigCities(List<BigCity> bigCities, String goal) {
         List<City> cities = new ArrayList<>();
         BigCity goalCity = null;
@@ -56,6 +56,7 @@ public class AStarAlgorithm {
         }
         return cities;
     }
+
 
     private static List<TestCase> readBigTests(String path) {
         List<TestCase> tests = new ArrayList<>();
@@ -73,6 +74,7 @@ public class AStarAlgorithm {
         return tests;
     }
 
+    // Process cities.txt file and store the cities as City Instance
     private static List<City> readCities(String path) {
         List<City> cities = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
@@ -91,6 +93,7 @@ public class AStarAlgorithm {
         return cities;
     }
 
+    // Process bigGraph_cities.txt file and store the cities as BigCity Instance
     private static List<BigCity> readBigCities(String path) {
         List<BigCity> cities = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
@@ -110,6 +113,7 @@ public class AStarAlgorithm {
         return cities;
     }
 
+    // Process connections.txt file and store the connections as Connection Instance
     private static List<Connection> readConnections(String path) {
         List<Connection> connections = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
@@ -127,6 +131,7 @@ public class AStarAlgorithm {
         }
         return connections;
     }
+
 
     private static City getCityByName(String cityName) {
         for (City city : cities) {
@@ -152,6 +157,7 @@ public class AStarAlgorithm {
             if (currentCity.equals(goal)) {
                 System.out.println("TOTAL COST " + currentNode.gCost);
                 return new ArrayList<>();
+//                return reconstructPath(parentMap, start, goal);
             }
             closedList.add(currentCity);
             boolean chargingNeeded = currentNode.remainingRange <= currentNode.gCost;
@@ -229,6 +235,7 @@ public class AStarAlgorithm {
         return list;
     }
 
+    // Reconstruct the path from start to goal using the parent map
     private static List<String> reconstructPath(Map<City, City> parentMap, City start, City goal) {
         List<String> path = new ArrayList<>();
         City current = goal;
@@ -240,6 +247,7 @@ public class AStarAlgorithm {
         return path;
     }
 
+    // Calculate distance between two cities
     public static double haversine_distance(double lat1, double lon1, double lat2, double lon2) {
         final double d = 12742;
         double sinHalfDeltaLat = Math.sin(Math.toRadians(lat2 - lat1) / 2);
