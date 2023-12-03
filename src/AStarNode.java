@@ -1,11 +1,11 @@
 class AStarNode implements Comparable<AStarNode> {
     City city;
-    int gCost;
-    int hCost;
-    int totalCost;
-    int remainingRange;
+    double gCost;
+    double hCost;
+    double totalCost;
+    double remainingRange;
 
-    public AStarNode(City city, int gCost, int hCost, int remainingRange) {
+    public AStarNode(City city, double gCost, double hCost, double remainingRange) {
         this.city = city;
         this.gCost = gCost;
         this.hCost = hCost;
@@ -22,7 +22,7 @@ class AStarNode implements Comparable<AStarNode> {
 //        } else if(!this.city.hasChargeStation && other.city.hasChargeStation){
 //            return 1;
 //        } else{
-            return Integer.compare(this.totalCost, other.totalCost);
+            return Double.compare(this.totalCost, other.totalCost);
 
     }
 }
