@@ -33,48 +33,47 @@ public class AStarAlgorithm {
         openList.add(startNode);
 
         while (!openList.isEmpty()) {
-            System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
-            System.out.println("-------------------------\n");
+//            System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
+//            System.out.println("-------------------------\n");
             AStarNode currentNode = openList.poll();
             City currentCity = currentNode.city;
 
             if (currentCity.equals(goal)) {
+                System.out.println("* COMPLETED *");
                 System.out.println("TOTAL COST " + currentNode.gCost);
-                System.out.println("B REACHED");
                 return reconstructPath(parentMap, start, goal);
             }
             closedList.add(currentCity);
             boolean chargingNeeded = currentNode.remainingRange <= currentCity.heuristicValue;
 
-            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost + (chargingNeeded ? " | CHARGING NEEDED" : ""));
-            System.out.println("CLOSED LIST: " + "{ " + printList(closedList) + " }");
-            System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
-
-            System.out.println("------------Possible EXPANSIONS-------------");
+//            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost + (chargingNeeded ? " | CHARGING NEEDED" : ""));
+//            System.out.println("CLOSED LIST: " + "{ " + printList(closedList) + " }");
+//            System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
+//
+//            System.out.println("------------Possible EXPANSIONS-------------");
 
             boolean hasForwardConnection = false;
 
             for (Connection connection : connections) {
-//                System.out.println("START" + currentNode.remainingRange);
                 if ((connection.city1.equals(currentCity) || connection.city2.equals(currentCity)))
                 {
                     City neighbour = (connection.city1 == currentCity) ? connection.city2 : connection.city1;
                     if(closedList.contains(connection.city2)){
-                        System.out.println("* Neighbour "+  neighbour.name + " already explored. *");
+//                        System.out.println("* Neighbour "+  neighbour.name + " already explored. *");
                         continue;
                     }
                     hasForwardConnection = true;
                     int tentativeGCost = currentNode.gCost + connection.distance;
-                    System.out.print("*Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | " + connection.distance + " | ");
+//                    System.out.print("*Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | " + connection.distance + " | ");
 
                     // Check if it needs charging
                     if (currentNode.remainingRange < connection.distance && chargingNeeded) {
                         if(currentCity.hasChargeStation){
-                            System.out.print("CHARGING ");
+//                            System.out.print("CHARGING ");
                             currentNode.remainingRange = maxRange;
                             tentativeGCost += CHARGECOST;
                         } else {
-                            System.out.print("RANGE EXCEEDED \n");
+//                            System.out.print("RANGE EXCEEDED \n");
                             continue;
                         }
                     }
@@ -85,9 +84,9 @@ public class AStarAlgorithm {
                         parentMap.put(connection.city2, currentCity);
 
                         openList.add(neighbor);
-                        System.out.print(neighbor.city.name + " -> OpenList *");
+//                        System.out.print(neighbor.city.name + " -> OpenList *");
                     }
-                    System.out.println();
+//                    System.out.println();
                 }
             }
             if (!hasForwardConnection) {
@@ -99,10 +98,10 @@ public class AStarAlgorithm {
                         //CHARGE
                         closedList = new ArrayList<>();
                         closedList.add(currentCity);
-                        System.out.println("CHARGING");
+//                        System.out.println("CHARGING");
                         openList = new PriorityQueue<>();  // RESET OPENLIST
                         openList.add(new AStarNode(parentCity, costFromStart, parentCity.heuristicValue, newRemainingRange));
-                        System.out.println("Charging and Going back to parent city: " + parentCity.name);
+//                        System.out.println("Charging and Going back to parent city: " + parentCity.name);
                 }
             }
         }
