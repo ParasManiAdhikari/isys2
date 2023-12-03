@@ -4,19 +4,122 @@ import java.io.IOException;
 import java.util.*;
 public class AStarAlgorithm {
     public static List<City> cities = new ArrayList<>();
+    public static List<BigCity> bigCities = new ArrayList<>();
     public static List<Connection> connections = new ArrayList<>();
-    public static int STARTCOST = 0;
-    public static int CHARGECOST = 10;
+    public static List<TestCase> testCases = readBigTests("src/resources/testcases_Teilaufgabe_3/testcases_bigGraph.txt");
+
+    public static double STARTCOST = 0;
+    public static double CHARGECOST = 10;
+    public static double BigTestRange = 200;
     public static void main(String[] args) {
-        int[] ranges = {410, 500, 30, 40, 30, 410, 410};
-        for(int i = 1; i <= 7; i++){
-            System.out.println("TESTCASE " +  i);
-            cities = readCities("src/resources/testcases_Teilaufgabe_2/t" + i + "_cities.txt");
-            connections = readConnections("src/resources/testcases_Teilaufgabe_2/t" + i + "_connections.txt");
-            List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), ranges[i-1]);
-            System.out.println(path);
-            System.out.println("-----------");
+//        int[] ranges = {410, 500, 30, 40, 30, 410, 410};
+//        for(double i = 1; i <= 7; i++){
+//            System.out.println("TESTCASE " +  i);
+//            cities = readCities("src/resources/testcases_Teilaufgabe_2/t" + i + "_cities.txt");
+//            connections = readConnections("src/resources/testcases_Teilaufgabe_2/t" + i + "_connections.txt");
+//            List<String> path = aStarSearch(getCityByName("A"), getCityByName("B"), ranges[i-1]);
+//            System.out.println(path);
+//            System.out.println("-----------");
+//        }
+//        for(TestCase testCase : testCases){
+//            bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
+//            cities = convertBigCities(bigCities, testCase.goal);
+//            connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
+//            List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), 200);
+//            System.out.println("-------");
+//        }
+        TestCase testCase = new TestCase("Bohmte", "Kappeln");
+        bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
+        cities = convertBigCities(bigCities, testCase.goal);
+        connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
+        List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), 200);
+        System.out.println("-------");
+    }
+
+    private static List<City> convertBigCities(List<BigCity> bigCities, String goal) {
+        List<City> cities = new ArrayList<>();
+        BigCity goalCity = null;
+        // Find Goal City
+        for(BigCity bigCity: bigCities){
+            if(bigCity.name.equals(goal)){
+                goalCity = bigCity;
+            }
         }
+        // Convert Bigcity to City
+        for(BigCity bigCity: bigCities){
+            double heuristic = haversine_distance(bigCity.latitude, bigCity.longitude, goalCity.latitude, goalCity.longitude);
+            cities.add(new City(bigCity.name, heuristic, bigCity.hasChargeStation));
+        }
+        return cities;
+    }
+
+    private static List<TestCase> readBigTests(String path) {
+        List<TestCase> tests = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(";");
+                String start = parts[0];
+                String goal = parts[1];
+                tests.add(new TestCase(start, goal));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return tests;
+    }
+    private static List<City> readCities(String path) {
+        List<City> cities = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String line;
+            br.readLine(); // Skip the header line
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(";");
+                String name = parts[0];
+                double heuristicValue = Integer.parseInt(parts[1]);
+                boolean hasChargeStation = Boolean.parseBoolean(parts[2]);
+                cities.add(new City(name, heuristicValue, hasChargeStation));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return cities;
+    }
+    private static List<BigCity> readBigCities(String path) {
+        List<BigCity> cities = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String line;
+            br.readLine(); // Skip the header line
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(";");
+                String name = parts[0];
+                double latitude = Double.parseDouble(parts[1]);
+                double longitude = Double.parseDouble(parts[2]);
+                boolean hasChargeStation = Boolean.parseBoolean(parts[3]);
+                cities.add(new BigCity(name, latitude, longitude, hasChargeStation));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return cities;
+    }
+
+    private static List<Connection> readConnections(String path) {
+        List<Connection> connections = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            String line;
+            br.readLine(); // Skip the header line
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(";");
+                City city1 = getCityByName(parts[0]);
+                City city2 = getCityByName(parts[1]);
+                double distance = Integer.parseInt(parts[2]);
+                connections.add(new Connection(city1, city2, distance));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return connections;
     }
 
     private static City getCityByName(String cityName) {
@@ -28,7 +131,7 @@ public class AStarAlgorithm {
         return null; // City not found
     }
 
-    public static List<String> aStarSearch(City start, City goal, int maxRange) {
+    public static List<String> aStarSearch(City start, City goal, double maxRange) {
         PriorityQueue<AStarNode> openList = new PriorityQueue<>();
         List<City> closedList = new ArrayList<>();
 
@@ -67,7 +170,7 @@ public class AStarAlgorithm {
                         continue;
                     }
                     hasForwardConnection = true;
-                    int tentativeGCost = currentNode.gCost + connection.distance;
+                    double costFromStart = currentNode.gCost + connection.distance;
 //                    System.out.print("*Current -> Neighbour:  " +  connection.city1.name + " -> " + connection.city2.name + " | " + connection.distance + " | ");
 
                     // Check if it needs charging
@@ -75,16 +178,16 @@ public class AStarAlgorithm {
                         if(currentCity.hasChargeStation){
 //                            System.out.print("CHARGING ");
                             currentNode.remainingRange = maxRange;
-                            tentativeGCost += CHARGECOST;
+                            costFromStart += CHARGECOST;
                         } else {
 //                            System.out.print("RANGE EXCEEDED \n");
                             continue;
                         }
                     }
 
-                    AStarNode neighbor = new AStarNode(connection.city2, tentativeGCost, connection.city2.heuristicValue, currentNode.remainingRange-connection.distance) ;
+                    AStarNode neighbor = new AStarNode(connection.city2, costFromStart, connection.city2.heuristicValue, currentNode.remainingRange-connection.distance) ;
 
-                    if (!openList.contains(neighbor) || tentativeGCost < neighbor.gCost) {
+                    if (!openList.contains(neighbor) || costFromStart < neighbor.gCost) {
                         parentMap.put(connection.city2, currentCity);
 
                         openList.add(neighbor);
@@ -93,12 +196,13 @@ public class AStarAlgorithm {
 //                    System.out.println();
                 }
             }
+            // CHECK RETOUR
             if (!hasForwardConnection) {
                 City parentCity = parentMap.get(currentCity);
-                int distance = getDistance(parentCity, currentCity);
+                double distance = getDistance(parentCity, currentCity);
                 if (parentCity != null && currentCity.hasChargeStation && chargingNeeded) {
-                        int costFromStart = currentNode.gCost + distance + CHARGECOST;
-                        int newRemainingRange = maxRange - distance;
+                        double costFromStart = currentNode.gCost + distance + CHARGECOST;
+                        double newRemainingRange = maxRange - distance;
                         //CHARGE
                         closedList = new ArrayList<>();
                         closedList.add(currentCity);
@@ -114,7 +218,7 @@ public class AStarAlgorithm {
         return new ArrayList<>();
     }
 
-    private static int getDistance(City parentCity, City currentCity) {
+    private static double getDistance(City parentCity, City currentCity) {
         for (Connection connection : connections) {
             if ((connection.city1.equals(parentCity) && connection.city2.equals(currentCity)) ||
                     (connection.city1.equals(currentCity) && connection.city2.equals(parentCity))) {
@@ -148,7 +252,7 @@ public class AStarAlgorithm {
         }
     }
 
-    private static int heuristicValue(City currentCity, City goalCity) {
+    private static double heuristicValue(City currentCity, City goalCity) {
         return Math.abs(currentCity.heuristicValue - goalCity.heuristicValue);
     }
 
@@ -164,39 +268,14 @@ public class AStarAlgorithm {
         return path;
     }
 
-    private static List<City> readCities(String path) {
-        List<City> cities = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            String line;
-            br.readLine(); // Skip the header line
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(";");
-                String name = parts[0];
-                int heuristicValue = Integer.parseInt(parts[1]);
-                boolean hasChargeStation = Boolean.parseBoolean(parts[2]);
-                cities.add(new City(name, heuristicValue, hasChargeStation));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return cities;
-    }
-
-    private static List<Connection> readConnections(String path) {
-        List<Connection> connections = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            String line;
-            br.readLine(); // Skip the header line
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(";");
-                City city1 = getCityByName(parts[0]);
-                City city2 = getCityByName(parts[1]);
-                int distance = Integer.parseInt(parts[2]);
-                connections.add(new Connection(city1, city2, distance));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return connections;
+    public static double haversine_distance(double lat1, double lon1, double lat2, double lon2) {
+        final double d = 12742;
+        double sinHalfDeltaLat = Math.sin(Math.toRadians(lat2 - lat1) / 2);
+        double sinHalfDeltaLon = Math.sin(Math.toRadians(lon2 - lon1) / 2);
+        double latARadians = Math.toRadians(lat1);
+        double latBRadians = Math.toRadians(lat2);
+        double a = sinHalfDeltaLat * sinHalfDeltaLat
+                + Math.cos(latARadians) * Math.cos(latBRadians) * sinHalfDeltaLon * sinHalfDeltaLon;
+        return d * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 }

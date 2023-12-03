@@ -1,9 +1,9 @@
 public class City {
     String name;
-    int heuristicValue;
+    double heuristicValue;
     boolean hasChargeStation;
 
-    public City(String name, int heuristicValue, boolean hasChargeStation) {
+    public City(String name, double heuristicValue, boolean hasChargeStation) {
         this.name = name;
         this.heuristicValue = heuristicValue;
         this.hasChargeStation = hasChargeStation;
