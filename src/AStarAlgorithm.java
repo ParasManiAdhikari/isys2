@@ -148,12 +148,13 @@ public class AStarAlgorithm {
 
             if (currentCity.equals(goal)) {
                 System.out.println("TOTAL COST " + currentNode.gCost);
+                System.out.println(reconstructPath(parentMap, start, goal));
                 return reconstructPath(parentMap, start, goal);
             }
             closedList.add(currentCity);
-            boolean chargingNeeded = currentNode.remainingRange <= currentCity.heuristicValue;
+            boolean chargingNeeded = currentNode.remainingRange <= currentNode.gCost;
 
-//            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost + (chargingNeeded ? " | CHARGING NEEDED" : ""));
+            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost + (chargingNeeded ? " | CHARGING NEEDED" : ""));
 //            System.out.println("CLOSED LIST: " + "{ " + printList(closedList) + " }");
 //            System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
 //
@@ -165,7 +166,7 @@ public class AStarAlgorithm {
                 if ((connection.city1.equals(currentCity) || connection.city2.equals(currentCity)))
                 {
                     City neighbour = (connection.city1 == currentCity) ? connection.city2 : connection.city1;
-                    if(closedList.contains(connection.city2)){
+                    if(closedList.contains(neighbour)){
 //                        System.out.println("* Neighbour "+  neighbour.name + " already explored. *");
                         continue;
                     }
@@ -185,10 +186,10 @@ public class AStarAlgorithm {
                         }
                     }
 
-                    AStarNode neighbor = new AStarNode(connection.city2, costFromStart, connection.city2.heuristicValue, currentNode.remainingRange-connection.distance) ;
-
-                    if (!openList.contains(neighbor) || costFromStart < neighbor.gCost) {
-                        parentMap.put(connection.city2, currentCity);
+                    AStarNode neighbor = new AStarNode(neighbour, costFromStart, neighbour.heuristicValue, currentNode.remainingRange-connection.distance) ;
+                    AStarNode openListContains = openListContains(neighbour, openList);
+                    if (openListContains == null) {
+                        parentMap.put(neighbour, currentCity);
 
                         openList.add(neighbor);
 //                        System.out.print(neighbor.city.name + " -> OpenList *");
@@ -216,6 +217,15 @@ public class AStarAlgorithm {
 //            printParentMap(parentMap);
         System.out.println("Es existiert keine Lösung");
         return new ArrayList<>();
+    }
+
+    private static AStarNode openListContains(City neighbor, PriorityQueue<AStarNode> openList) {
+        for(AStarNode node: openList){
+            if(node.city == neighbor){
+                return node;
+            }
+        }
+        return null;
     }
 
     private static double getDistance(City parentCity, City currentCity) {
