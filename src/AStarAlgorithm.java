@@ -33,6 +33,7 @@ public class AStarAlgorithm {
      * Cost of starting the journey.
      */
     public static double STARTCOST = 0;
+    public static double pathsize = 0;
 
     /**
      * Cost of charging during the journey.
@@ -66,11 +67,12 @@ public class AStarAlgorithm {
 //        }
         // AUFGABE 3
         for(TestCase testCase : testCases){
+            System.out.println(testCase.start + " - " + testCase.goal);
             bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
             cities = convertBigCities(bigCities, testCase.goal);
             connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
             List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), BigTestRange);
-//            System.out.println("-------");
+            System.out.println("-------");
         }
 
         double averageCost = totalKosten.stream()
@@ -249,8 +251,9 @@ public class AStarAlgorithm {
             if (currentCity.equals(goal)) {
                 expandedNodes.add(grenzbereich);
                 totalKosten.add((int) currentNode.gCost);
-//                System.out.println("Grenzbereich " +  grenzbereich);
-//                System.out.println("TOTAL COST " + currentNode.gCost);
+                System.out.println("Grenzbereich " +  grenzbereich);
+                System.out.println("SUCH BAUM " + pathsize);
+                System.out.println("TOTAL COST " + currentNode.gCost);
 //                return new ArrayList<>();
                 return reconstructPath(parentMap, start, goal);
             }
@@ -369,6 +372,7 @@ public class AStarAlgorithm {
             iterations++;
         }
         Collections.reverse(path);
+        pathsize = path.size();
         suchBaumNodes.add(path.size());
         return path;
     }
