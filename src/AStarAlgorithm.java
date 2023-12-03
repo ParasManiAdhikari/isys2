@@ -21,19 +21,20 @@ public class AStarAlgorithm {
 //            System.out.println(path);
 //            System.out.println("-----------");
 //        }
-//        for(TestCase testCase : testCases){
-//            bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
-//            cities = convertBigCities(bigCities, testCase.goal);
-//            connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
-//            List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), 200);
-//            System.out.println("-------");
-//        }
-        TestCase testCase = new TestCase("Bohmte", "Kappeln");
-        bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
-        cities = convertBigCities(bigCities, testCase.goal);
-        connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
-        List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), 200);
-        System.out.println("-------");
+        for(TestCase testCase : testCases){
+            bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
+            cities = convertBigCities(bigCities, testCase.goal);
+            connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
+            List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), 200);
+            System.out.println(path);
+            System.out.println("-------");
+        }
+//        TestCase testCase = new TestCase("Bohmte", "Kappeln");
+//        bigCities = readBigCities("src/resources/testcases_Teilaufgabe_3/bigGraph_cities.txt");
+//        cities = convertBigCities(bigCities, testCase.goal);
+//        connections = readConnections("src/resources/testcases_Teilaufgabe_3/bigGraph_connections.txt");
+//        List<String> path = aStarSearch(getCityByName(testCase.start), getCityByName(testCase.goal), 200);
+//        System.out.println("-------");
     }
 
     private static List<City> convertBigCities(List<BigCity> bigCities, String goal) {
@@ -148,13 +149,13 @@ public class AStarAlgorithm {
 
             if (currentCity.equals(goal)) {
                 System.out.println("TOTAL COST " + currentNode.gCost);
-                System.out.println(reconstructPath(parentMap, start, goal));
-                return reconstructPath(parentMap, start, goal);
+//                return reconstructPath(parentMap, start, goal);
+                return new ArrayList<>();
             }
             closedList.add(currentCity);
             boolean chargingNeeded = currentNode.remainingRange <= currentNode.gCost;
 
-            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost + (chargingNeeded ? " | CHARGING NEEDED" : ""));
+//            System.out.println(currentCity.name + " : Chosen from Open List | " + "Remaining : " + currentNode.remainingRange + " | Cost: " + currentNode.gCost + (chargingNeeded ? " | CHARGING NEEDED" : ""));
 //            System.out.println("CLOSED LIST: " + "{ " + printList(closedList) + " }");
 //            System.out.println("OPEN LIST: " + "{" + printList2(openList) + "}");
 //
